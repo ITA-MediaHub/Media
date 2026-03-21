@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+message GetMediaByIdRequest {
+    int32 id = 1;
+}
+
+enum MediaType {
+    MEDIA_TYPE_UNKNOWN = 0;
+    MEDIA_TYPE_MUSIC = 1;
+    MEDIA_TYPE_BOOK = 2;
+    MEDIA_TYPE_MOVIE = 3;
+    MEDIA_TYPE_TV = 4;
+    MEDIA_TYPE_GAME = 5;
+}
+
+message MediaResponse {
+    int32 id = 1;
+    string title = 2;
+    MediaType type = 3;
+}
+
+service MediaService {
+    rpc GetMediaById(GetMediaByIdRequest) returns (MediaResponse);
+}
