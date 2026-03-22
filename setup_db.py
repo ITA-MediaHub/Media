@@ -1,9 +1,12 @@
 import sqlite3
 
-connection = sqlite3.connect("dev.sqlite3")
+DATABASE = "db/dev.sqlite3"
+SETUP_SCRIPT = "db/setup.sql"
+
+connection = sqlite3.connect(DATABASE)
 cursor = connection.cursor()
 
-with open("setup_db.sql") as file:
+with open(SETUP_SCRIPT) as file:
     script = file.read()
     cursor.executescript(script)
 
