@@ -32,8 +32,13 @@ def updateCover(id, type, content):
     if db.rowcount < 1:
         raise RuntimeError("Unknown error updating cover")
     
-def removeCover(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+def removeCover(id, cursor = None):
+    should_close = True
+    if not cursor:
+        db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    else:
+        db = cursor
+        should_close = False
 
     db.execute("SELECT * FROM cover WHERE id=?", (id,))
     result = db.fetchone()
@@ -43,4 +48,7 @@ def removeCover(id):
     db.execute("DELETE FROM cover WHERE id=?", (id,))
     if db.rowcount < 1:
         raise RuntimeError("Unknown error deleting cover")
+    
+    if should_close:
+        db.close()
     

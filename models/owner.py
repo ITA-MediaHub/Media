@@ -27,6 +27,8 @@ def updateOwner(id, username):
         raise ValueError("Owner with given ID does not exist")
     
     db.execute("UPDATE owner SET username=? WHERE id=?", (username, id))
+    if db.rowcount < 1:
+        raise RuntimeError("Unknown error deleting owner")
 
 def removeOwner(id):
     db = sqlite3.connect(DATABASE, autocommit=True).cursor()
