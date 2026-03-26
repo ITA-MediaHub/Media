@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+// Common Definitions
+
+message Book {
+    optional int32 id = 6;
+    string title = 1;
+    optional int32 pub_year = 2;
+    Owner owner = 3;
+    optional Cover cover = 4;
+    repeated Author authors = 5;
+}
+
+message Owner {
+    int32 id = 1;
+    string username = 2;
+}
+
+message Cover {
+    string type = 1;
+    bytes content = 2;
+}
+
+message Author {
+    string last_name = 1;
+    optional string first_name = 2;
+}
+
+message Error {
+    string error_msg = 1;
+}
+
+message Success {
+    string success_msg = 1;
+}
+
+// GetBooks
+
+message GetBooksRequest { }
+
+message GetBooksResponse { // just one book, the response is sent as a stream
+    Book book = 1;
+}
+
+// GetBookById
+
+message GetBookByIdRequest {
+    int32 id = 1;
+}
+
+message GetBookByIdResponse {
+    oneof GetBookByIdResponseOneOf {
+        Error error = 1;
+        Book book = 2;
+    }
+}
+
+// GetBooksByOwner
+
+message GetBooksByOwnerRequest {
+    int32 owner_id = 1;
+}
+
+message GetBooksByOwnerResponse {
+    oneof GetBooksByOwnerResponseOneOf {
+        Error error = 1;
+        Book book = 2;
+    }
+}
+
+// AddBook
+
+message AddBookRequest {
+    Book book = 1;
+}
+
+message AddBookResponse {
+    oneof AddBookResponseOneOf {
+        int32 book_id = 1;
+        Error error = 2;
+    }
+}
+
+// UpdateBook
+
+message UpdateBookRequest {
+    int32 id = 1;
+    optional string title = 2;
+    optional int32 pub_year = 3;
+    optional Owner owner = 4;
+    optional Cover cover = 5;
+    optional bool clear_authors = 6;
+    repeated Author authors = 7;
+}
+
+message UpdateBookResponse {
+    oneof UpdateBookResponseOneOf {
+        Error error = 1;
+        Success success = 2;
+    }
+}
+
+// RemoveBookCover
+
+message RemoveBookCoverRequest {
+    int32 id = 1;
+}
+
+message RemoveBookCoverResponse {
+    oneof RemoveBookCoverResponseOneOf {
+        Error error = 1;
+        Success success = 2;
+    }
+}
+
+// RemoveBook
+
+message RemoveBookRequest {
+    int32 id = 1;
+}
+
+message RemoveBookResponse {
+    oneof RemoveBookResponseOneOf {
+        Error error = 1;
+        Success success = 2;
+    }
+}

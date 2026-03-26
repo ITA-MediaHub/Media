@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "book_service_msg.proto";
+
+service BookService {
+    rpc GetBooks(GetBooksRequest) returns (stream GetBooksResponse);
+    rpc GetBookById(GetBookByIdRequest) returns (GetBookByIdResponse);
+    rpc GetBooksByOwner(GetBooksByOwnerRequest) returns (stream GetBooksByOwnerResponse);
+    rpc AddBook(AddBookRequest) returns (AddBookResponse);
+    rpc UpdateBook(UpdateBookRequest) returns (UpdateBookResponse);
+    rpc RemoveBookCover(RemoveBookCoverRequest) returns (RemoveBookCoverResponse);
+    rpc RemoveBook(RemoveBookRequest) returns (RemoveBookResponse);
+}
