@@ -106,6 +106,18 @@ def getBooks():
 
     db.close()
 
+def getBooksByOwner(owner_id):
+    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+
+    db.execute("SELECT id FROM book WHERE owner_id=?", (owner_id,))
+
+    while (result := db.fetchone()) is not None:
+        (book_id,) = result
+        book_dict = getBookById(book_id)
+        yield book_dict
+
+    db.close()
+
 def removeBook(id):
     db = sqlite3.connect(DATABASE, autocommit=True).cursor()
 
