@@ -1,17 +1,18 @@
 import sqlite3
+import os
 
-DATABASE = "db/dev.sqlite3"
+from book_service.models.db import get_database
 ALLOWED_TYPES = ["image/png", "image/jpg", "image/jpeg"]
 
 def addCover(type, content):
     if type not in ALLOWED_TYPES:
         raise ValueError(f"type {type} is not an allowed image type!")
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
     db.execute("INSERT INTO cover (type, content) VALUES (?, ?)", (type, content))
     return db.lastrowid
 
 def getCoverById(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
     db.execute("SELECT * FROM cover WHERE id=?", (id,))
     result = db.fetchone()
     if not result:
@@ -21,7 +22,7 @@ def getCoverById(id):
 def updateCover(id, type, content):
     if type not in ALLOWED_TYPES:
         raise ValueError(f"type {type} is not an allowed image type!")
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM cover WHERE id=?", (id,))
     result = db.fetchone()
@@ -35,7 +36,7 @@ def updateCover(id, type, content):
 def removeCover(id, cursor = None):
     should_close = True
     if not cursor:
-        db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+        db = sqlite3.connect(get_database(), autocommit=True).cursor()
     else:
         db = cursor
         should_close = False

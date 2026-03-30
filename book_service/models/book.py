@@ -1,11 +1,12 @@
 import sqlite3
 from datetime import date
+import os
 
 from .owner import addOwner
 from .cover import addCover, updateCover, removeCover
 from .author import addAuthor
 
-DATABASE = "db/dev.sqlite3"
+from book_service.models.db import get_database
 
 def addBook(title, owner, pub_year = None, cover = None, authors = None):
     if len(title) == 0:
@@ -21,7 +22,7 @@ def addBook(title, owner, pub_year = None, cover = None, authors = None):
             if not isinstance(author, dict) or "last_name" not in author:
                 raise ValueError("all authors must be dicts with at least 'last_name' key")
             
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     owner_id = addOwner(owner["id"], owner["username"])
 
@@ -44,7 +45,7 @@ def addBook(title, owner, pub_year = None, cover = None, authors = None):
     return book_id
 
 def updateBook(id, title = None, owner = None, pub_year = None, cover = None, authors = None):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM book WHERE id=?", (id,))
     result = db.fetchone()
@@ -52,19 +53,24 @@ def updateBook(id, title = None, owner = None, pub_year = None, cover = None, au
         raise ValueError("Book with given ID does not exist")
 
     db.execute("BEGIN TRANSACTION")
-    if title is not None or pub_year is not None:
-        changeBookData(id, title, pub_year, db)
-    if cover is not None:
-        changeBookCover(id, cover, db)
-    if owner is not None:
-        changeBookOwner(id, owner, db)
-    if authors is not None:
-        changeBookAuthors(id, authors, db)
-    db.execute("COMMIT")
-    db.close()
+    try:
+        if title is not None or pub_year is not None:
+            changeBookData(id, title, pub_year, db)
+        if cover is not None:
+            changeBookCover(id, cover, db)
+        if owner is not None:
+            changeBookOwner(id, owner, db)
+        if authors is not None:
+            changeBookAuthors(id, authors, db)
+        db.execute("COMMIT")
+        db.close()
+    except Exception as e:
+        db.execute("ROLLBACK")
+        db.close()
+        raise e
 
 def getBookById(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM book WHERE id=?", (id,))
     result = db.fetchone()
@@ -95,7 +101,7 @@ def getBookById(id):
     return book_dict
 
 def getBooks():
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT id FROM book")
 
@@ -107,7 +113,7 @@ def getBooks():
     db.close()
 
 def getBooksByOwner(owner_id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT id FROM book WHERE owner_id=?", (owner_id,))
 
@@ -119,7 +125,7 @@ def getBooksByOwner(owner_id):
     db.close()
 
 def removeBook(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM book WHERE id=?", (id,))
     result = db.fetchone()
@@ -138,7 +144,7 @@ def removeBook(id):
 
 def changeBookData(id, title, pub_year, cursor = None):
     if not cursor:
-        cursor = sqlite3.connect(DATABASE, autocommit=True).cursor()
+        cursor = sqlite3.connect(get_database(), autocommit=True).cursor()
     if title is not None and len(title) == 0:
         raise ValueError("Title cannot be an empty string")
     if pub_year is not None and pub_year not in range(0, date.today().year + 1):
@@ -150,7 +156,7 @@ def changeBookData(id, title, pub_year, cursor = None):
 
 def changeBookCover(id, cover, cursor = None):
     if not cursor:
-        cursor = sqlite3.connect(DATABASE, autocommit=True).cursor()
+        cursor = sqlite3.connect(get_database(), autocommit=True).cursor()
     
     if not isinstance(cover, dict) or ("type" not in cover and "content" not in cover):
         raise ValueError("cover must be a dict with keys 'type' and 'content'")
@@ -161,7 +167,7 @@ def changeBookCover(id, cover, cursor = None):
 
 def changeBookOwner(id, owner, cursor = None):
     if not cursor:
-        cursor = sqlite3.connect(DATABASE, autocommit=True).cursor()
+        cursor = sqlite3.connect(get_database(), autocommit=True).cursor()
     
     if not isinstance(owner, dict) or ("id" not in owner and "username" not in owner):
         raise ValueError("owner must be a dict with keys 'id' and 'username'")
@@ -173,7 +179,7 @@ def changeBookOwner(id, owner, cursor = None):
 
 def changeBookAuthors(id, authors, cursor = None):
     if not cursor:
-        cursor = sqlite3.connect(DATABASE, autocommit=True).cursor()
+        cursor = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     if not isinstance(authors, list):
         raise ValueError("authors must be a list")
@@ -190,4 +196,16 @@ def changeBookAuthors(id, authors, cursor = None):
 
     for author_id in author_ids:
         cursor.execute("INSERT INTO book_has_author (book_id, author_id) VALUES (?, ?)", (id, author_id))
+
+def removeBookCover(id):
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
+
+    db.execute("SELECT cover_id FROM book WHERE id=?", (id,))
+    result = db.fetchone()
+    if not result:
+        raise ValueError("Book with given ID does not exist")
+    
+    removeCover(result[0], db)
+
+    db.close()
 

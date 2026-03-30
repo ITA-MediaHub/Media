@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import book_service_msg_pb2 as book__service__msg__pb2
+import book_service.grpc_interface.book_service_msg_pb2 as book__service__msg__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__

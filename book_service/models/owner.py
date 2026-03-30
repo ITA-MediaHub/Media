@@ -1,9 +1,10 @@
 import sqlite3
+import os
 
-DATABASE = "db/dev.sqlite3"
+from book_service.models.db import get_database
 
 def addOwner(id, username):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     if len(username) == 0:
         raise ValueError("Username cannot be empty string")
@@ -19,7 +20,7 @@ def addOwner(id, username):
     return db.lastrowid
 
 def updateOwner(id, username):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM owner WHERE id=?", (id,))
     result = db.fetchone()
@@ -31,7 +32,7 @@ def updateOwner(id, username):
         raise RuntimeError("Unknown error deleting owner")
 
 def removeOwner(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM owner WHERE id=?", (id,))
     result = db.fetchone()
@@ -43,7 +44,7 @@ def removeOwner(id):
         raise RuntimeError("Unknown error deleting owner")
     
 def getOwnerById(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM owner WHERE id=?", (id,))
     result = db.fetchone()

@@ -22,7 +22,7 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
-import book_service_msg_pb2 as book__service__msg__pb2
+import book_service.grpc_interface.book_service_msg_pb2 as book__service__msg__pb2
 
 
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x62ook_service.proto\x1a\x16\x62ook_service_msg.proto2\xa4\x03\n\x0b\x42ookService\x12\x31\n\x08GetBooks\x12\x10.GetBooksRequest\x1a\x11.GetBooksResponse0\x01\x12\x38\n\x0bGetBookById\x12\x13.GetBookByIdRequest\x1a\x14.GetBookByIdResponse\x12\x46\n\x0fGetBooksByOwner\x12\x17.GetBooksByOwnerRequest\x1a\x18.GetBooksByOwnerResponse0\x01\x12,\n\x07\x41\x64\x64\x42ook\x12\x0f.AddBookRequest\x1a\x10.AddBookResponse\x12\x35\n\nUpdateBook\x12\x12.UpdateBookRequest\x1a\x13.UpdateBookResponse\x12\x44\n\x0fRemoveBookCover\x12\x17.RemoveBookCoverRequest\x1a\x18.RemoveBookCoverResponse\x12\x35\n\nRemoveBook\x12\x12.RemoveBookRequest\x1a\x13.RemoveBookResponseb\x06proto3')

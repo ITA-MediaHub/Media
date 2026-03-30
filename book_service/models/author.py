@@ -1,9 +1,9 @@
 import sqlite3
-
-DATABASE = "db/dev.sqlite3"
+import os
+from book_service.models.db import get_database
 
 def addAuthor(last_name, first_name = None):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
     
     if len(last_name) == 0 or (first_name is not None and len(first_name) == 0):
         raise ValueError("Names cannot be empty strings")
@@ -20,7 +20,7 @@ def addAuthor(last_name, first_name = None):
     return db.lastrowid
 
 def removeAuthor(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
 
     db.execute("SELECT * FROM author WHERE id=?", (id,))
     result = db.fetchone()
@@ -32,7 +32,7 @@ def removeAuthor(id):
         raise RuntimeError("Unknown error deleting author")
     
 def updateAuthor(id, last_name, first_name = None):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
     
     if len(last_name) == 0 or (first_name is not None and len(first_name) == 0):
         raise ValueError("Names cannot be empty strings")
@@ -47,7 +47,7 @@ def updateAuthor(id, last_name, first_name = None):
         raise RuntimeError("Unknown error updating author")
     
 def getAuthorById(id):
-    db = sqlite3.connect(DATABASE, autocommit=True).cursor()
+    db = sqlite3.connect(get_database(), autocommit=True).cursor()
     db.execute("SELECT * FROM author WHERE id=?", (id,))
     result = db.fetchone()
     if not result:

@@ -1,16 +1,16 @@
 import grpc
-from book_service_pb2_grpc import BookServiceStub
-import book_service_msg_pb2
+from book_service.grpc_interface.book_service_pb2_grpc import BookServiceStub
+import book_service.grpc_interface.book_service_msg_pb2 as grpc_messages
 
 channel = grpc.insecure_channel("localhost:50051")
 stub = BookServiceStub(channel)
 
 def getBooks():
-    for response in stub.GetBooks(book_service_msg_pb2.GetBooksRequest()):
+    for response in stub.GetBooks(grpc_messages.GetBooksRequest()):
         print(response.book.id, response.book.title, response.book.pub_year, response.book.owner.username)
 
 def getBookById(id):
-    response = stub.GetBookById(book_service_msg_pb2.GetBookByIdRequest(id=id))
+    response = stub.GetBookById(grpc_messages.GetBookByIdRequest(id=id))
     field = response.WhichOneof("GetBookByIdResponseOneOf")
     if field == "error":
         print(response.error.error_msg)
@@ -24,8 +24,8 @@ def addBookTest():
 
     title = "MyBook"
     owner = {"id": 10, "username": "Špela"}
-    book_obj = book_service_msg_pb2.Book(title=title, owner=book_service_msg_pb2.Owner(id=owner["id"], username=owner["username"]))
-    response = stub.AddBook(book_service_msg_pb2.AddBookRequest(book=book_obj))
+    book_obj = grpc_messages.Book(title=title, owner=grpc_messages.Owner(id=owner["id"], username=owner["username"]))
+    response = stub.AddBook(grpc_messages.AddBookRequest(book=book_obj))
     field = response.WhichOneof("AddBookResponseOneOf")
     if field == "error":
         print(response.error.error_msg)
