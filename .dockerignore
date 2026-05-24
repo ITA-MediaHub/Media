@@ -1,0 +1,4 @@
+**/__pycache__
+book_service/tests
+book_service/grpc_client.py
+**/*.sqlite3

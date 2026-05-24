@@ -1,6 +1,7 @@
 import grpc
 from concurrent import futures
 import os
+import traceback
 
 from book_service.grpc_interface.book_service_pb2_grpc import BookServiceServicer, add_BookServiceServicer_to_server
 import book_service.grpc_interface.book_service_msg_pb2 as grpc_messages
@@ -74,6 +75,7 @@ class BookService(BookServiceServicer):
             book_id = book_model.addBook(title, owner, pub_year, cover, authors)
             return grpc_messages.AddBookResponse(book_id=book_id)
         except Exception as e:
+            print(traceback.format_exc())
             error = grpc_messages.Error(error_msg=str(e))
             return grpc_messages.AddBookResponse(error=error)
         
@@ -132,7 +134,7 @@ class BookService(BookServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     add_BookServiceServicer_to_server(BookService(), server)
-    server.add_insecure_port("localhost:50051")
+    server.add_insecure_port("0.0.0.0:3000")
     return server
 
 if __name__=="__main__":

@@ -13,11 +13,11 @@ import book_service.setup_db as db
 class TestEndpoints(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_dir = Path(__file__).resolve().parent.parent
+        base_dir = Path(__file__).resolve().parent.parent.parent
         db_path = base_dir / "book_service/db/test.sqlite3"
         cls.db_path = str(db_path)
         
-        db_path.unlink()
+        db_path.unlink(missing_ok=True)
         os.environ["DATABASE"] = cls.db_path
         db.setup(cls.db_path, str(base_dir / "book_service/db/setup.sql"))
 

@@ -2,7 +2,7 @@ import grpc
 from book_service.grpc_interface.book_service_pb2_grpc import BookServiceStub
 import book_service.grpc_interface.book_service_msg_pb2 as grpc_messages
 
-channel = grpc.insecure_channel("localhost:50051")
+channel = grpc.insecure_channel("localhost:3000")
 stub = BookServiceStub(channel)
 
 def getBooks():
