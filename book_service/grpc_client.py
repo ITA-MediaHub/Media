@@ -23,9 +23,9 @@ def addBookTest():
     # remember to set unset pub_years to -1 instead of sending empty since it will store as 0
 
     title = "MyBook"
-    owner = {"id": 1, "username": "Tibor"}
+    owner = {"id": 1, "username": "asda"}
     book_obj = grpc_messages.Book(title=title, owner=grpc_messages.Owner(id=owner["id"], username=owner["username"]))
-    response = stub.AddBook(grpc_messages.AddBookRequest(book=book_obj, token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6IlRpbmthcmEifQ.YWdF84xJN21gUgOOLclpWYZHzJCkdgrdBFtdkrA2Rxg"))
+    response = stub.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=".."))
     field = response.WhichOneof("AddBookResponseOneOf")
     if field == "error":
         print(response.error.error_msg)
@@ -34,7 +34,7 @@ def addBookTest():
     else: raise ValueError("Invalid response recieved")
 
 def updateBookTest():
-    request = grpc_messages.UpdateBookRequest(id=1, title="NewBook", token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6IlRpYm9yIn0.i5PNHL67MS4ICjD7LicqJR_jyG4HRDTnew9siADhxjA")
+    request = grpc_messages.UpdateBookRequest(id=1, title="NewBook", token="")
     response = stub.UpdateBook(request)
     field = response.WhichOneof("UpdateBookResponseOneOf")
     if field == "error":
@@ -43,7 +43,7 @@ def updateBookTest():
         print(response.success.success_msg)
 
 def removeBookCoverTest():
-    request = grpc_messages.RemoveBookCoverRequest(id=1, token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6IlRpYm9yIn0.i5PNHL67MS4ICjD7LicqJR_jyG4HRDTnew9siADhxjA")
+    request = grpc_messages.RemoveBookCoverRequest(id=1, token="..")
     response = stub.RemoveBookCover(request)
     field = response.WhichOneof("RemoveBookCoverResponseOneOf")
     if field == "error":
@@ -53,9 +53,9 @@ def removeBookCoverTest():
 
 
 def main():
-    #addBookTest()
+    addBookTest()
     #updateBookTest()
-    removeBookCoverTest()
+    #removeBookCoverTest()
 
 if __name__=="__main__":
     main()

@@ -9,8 +9,8 @@ from book_service.grpc_interface.book_service_pb2_grpc import BookServiceService
 import book_service.grpc_interface.book_service_msg_pb2 as grpc_messages
 import book_service.models.book as book_model
 
-USERS_SERVICE_LOCATION = "http://localhost:8000"
-TESTING = os.environ["TESTING"] or False
+USERS_SERVICE_LOCATION = os.environ.get("USERS_SERVICE_LOCATION") or "http://localhost:8000"
+TESTING = os.environ.get("TESTING") or False
 
 class BookService(BookServiceServicer):
 
