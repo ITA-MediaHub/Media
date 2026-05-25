@@ -31,7 +31,7 @@ class TestEndpoints(unittest.TestCase):
 
         time.sleep(0.5)
 
-        cls.channel = grpc.insecure_channel("localhost:50051")
+        cls.channel = grpc.insecure_channel("localhost:3000")
         cls.client = BookServiceStub(cls.channel)
 
     @classmethod
