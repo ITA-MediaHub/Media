@@ -72,6 +72,7 @@ message GetBooksByOwnerResponse {
 
 message AddBookRequest {
     Book book = 1;
+    string token = 2;
 }
 
 message AddBookResponse {
@@ -91,6 +92,7 @@ message UpdateBookRequest {
     optional Cover cover = 5;
     optional bool clear_authors = 6;
     repeated Author authors = 7;
+    string token = 8;
 }
 
 message UpdateBookResponse {
@@ -104,6 +106,7 @@ message UpdateBookResponse {
 
 message RemoveBookCoverRequest {
     int32 id = 1;
+    string token = 2;
 }
 
 message RemoveBookCoverResponse {
@@ -117,6 +120,7 @@ message RemoveBookCoverResponse {
 
 message RemoveBookRequest {
     int32 id = 1;
+    string token = 2;
 }
 
 message RemoveBookResponse {

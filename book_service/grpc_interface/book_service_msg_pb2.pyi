@@ -97,10 +97,12 @@ class GetBooksByOwnerResponse(_message.Message):
     def __init__(self, error: _Optional[_Union[Error, _Mapping]] = ..., book: _Optional[_Union[Book, _Mapping]] = ...) -> None: ...
 
 class AddBookRequest(_message.Message):
-    __slots__ = ("book",)
+    __slots__ = ("book", "token")
     BOOK_FIELD_NUMBER: _ClassVar[int]
+    TOKEN_FIELD_NUMBER: _ClassVar[int]
     book: Book
-    def __init__(self, book: _Optional[_Union[Book, _Mapping]] = ...) -> None: ...
+    token: str
+    def __init__(self, book: _Optional[_Union[Book, _Mapping]] = ..., token: _Optional[str] = ...) -> None: ...
 
 class AddBookResponse(_message.Message):
     __slots__ = ("book_id", "error")
@@ -111,7 +113,7 @@ class AddBookResponse(_message.Message):
     def __init__(self, book_id: _Optional[int] = ..., error: _Optional[_Union[Error, _Mapping]] = ...) -> None: ...
 
 class UpdateBookRequest(_message.Message):
-    __slots__ = ("id", "title", "pub_year", "owner", "cover", "clear_authors", "authors")
+    __slots__ = ("id", "title", "pub_year", "owner", "cover", "clear_authors", "authors", "token")
     ID_FIELD_NUMBER: _ClassVar[int]
     TITLE_FIELD_NUMBER: _ClassVar[int]
     PUB_YEAR_FIELD_NUMBER: _ClassVar[int]
@@ -119,6 +121,7 @@ class UpdateBookRequest(_message.Message):
     COVER_FIELD_NUMBER: _ClassVar[int]
     CLEAR_AUTHORS_FIELD_NUMBER: _ClassVar[int]
     AUTHORS_FIELD_NUMBER: _ClassVar[int]
+    TOKEN_FIELD_NUMBER: _ClassVar[int]
     id: int
     title: str
     pub_year: int
@@ -126,7 +129,8 @@ class UpdateBookRequest(_message.Message):
     cover: Cover
     clear_authors: bool
     authors: _containers.RepeatedCompositeFieldContainer[Author]
-    def __init__(self, id: _Optional[int] = ..., title: _Optional[str] = ..., pub_year: _Optional[int] = ..., owner: _Optional[_Union[Owner, _Mapping]] = ..., cover: _Optional[_Union[Cover, _Mapping]] = ..., clear_authors: bool = ..., authors: _Optional[_Iterable[_Union[Author, _Mapping]]] = ...) -> None: ...
+    token: str
+    def __init__(self, id: _Optional[int] = ..., title: _Optional[str] = ..., pub_year: _Optional[int] = ..., owner: _Optional[_Union[Owner, _Mapping]] = ..., cover: _Optional[_Union[Cover, _Mapping]] = ..., clear_authors: bool = ..., authors: _Optional[_Iterable[_Union[Author, _Mapping]]] = ..., token: _Optional[str] = ...) -> None: ...
 
 class UpdateBookResponse(_message.Message):
     __slots__ = ("error", "success")
@@ -137,10 +141,12 @@ class UpdateBookResponse(_message.Message):
     def __init__(self, error: _Optional[_Union[Error, _Mapping]] = ..., success: _Optional[_Union[Success, _Mapping]] = ...) -> None: ...
 
 class RemoveBookCoverRequest(_message.Message):
-    __slots__ = ("id",)
+    __slots__ = ("id", "token")
     ID_FIELD_NUMBER: _ClassVar[int]
+    TOKEN_FIELD_NUMBER: _ClassVar[int]
     id: int
-    def __init__(self, id: _Optional[int] = ...) -> None: ...
+    token: str
+    def __init__(self, id: _Optional[int] = ..., token: _Optional[str] = ...) -> None: ...
 
 class RemoveBookCoverResponse(_message.Message):
     __slots__ = ("error", "success")
@@ -151,10 +157,12 @@ class RemoveBookCoverResponse(_message.Message):
     def __init__(self, error: _Optional[_Union[Error, _Mapping]] = ..., success: _Optional[_Union[Success, _Mapping]] = ...) -> None: ...
 
 class RemoveBookRequest(_message.Message):
-    __slots__ = ("id",)
+    __slots__ = ("id", "token")
     ID_FIELD_NUMBER: _ClassVar[int]
+    TOKEN_FIELD_NUMBER: _ClassVar[int]
     id: int
-    def __init__(self, id: _Optional[int] = ...) -> None: ...
+    token: str
+    def __init__(self, id: _Optional[int] = ..., token: _Optional[str] = ...) -> None: ...
 
 class RemoveBookResponse(_message.Message):
     __slots__ = ("error", "success")

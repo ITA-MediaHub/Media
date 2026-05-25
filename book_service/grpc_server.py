@@ -2,10 +2,13 @@ import grpc
 from concurrent import futures
 import os
 import traceback
+import requests
 
 from book_service.grpc_interface.book_service_pb2_grpc import BookServiceServicer, add_BookServiceServicer_to_server
 import book_service.grpc_interface.book_service_msg_pb2 as grpc_messages
 import book_service.models.book as book_model
+
+USERS_SERVICE_LOCATION = "http://localhost:8000"
 
 class BookService(BookServiceServicer):
 
@@ -36,6 +39,17 @@ class BookService(BookServiceServicer):
             book_obj.cover.content=book["cover"]["content"]
 
         return book_obj
+
+    def validateToken(self, token):
+        response = requests.post(f"{USERS_SERVICE_LOCATION}/users/validate/", json={"token": token})
+        response_json = response.json()
+
+        if response.status_code != 200:
+            raise ValueError(f"Error validating token: {response_json["error"]}")
+        
+        user_id = response_json["user_id"]
+        username = response_json["username"]
+        return (user_id, username)
 
     def GetBooks(self, request, context):
         for book in book_model.getBooks():
@@ -72,6 +86,9 @@ class BookService(BookServiceServicer):
         for author in request.book.authors:
             authors.append({"last_name": author.last_name, "first_name": author.first_name if author.first_name != "" else None})
         try:
+            user_id, username = self.validateToken(request.token)
+            if user_id != owner["id"] or username != owner["username"]:
+                raise ValueError("Mismatch between owner and token (id, username or both)")
             book_id = book_model.addBook(title, owner, pub_year, cover, authors)
             return grpc_messages.AddBookResponse(book_id=book_id)
         except Exception as e:

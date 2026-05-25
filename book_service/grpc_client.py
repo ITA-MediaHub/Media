@@ -23,9 +23,9 @@ def addBookTest():
     # remember to set unset pub_years to -1 instead of sending empty since it will store as 0
 
     title = "MyBook"
-    owner = {"id": 10, "username": "Špela"}
+    owner = {"id": 1, "username": "Tibor"}
     book_obj = grpc_messages.Book(title=title, owner=grpc_messages.Owner(id=owner["id"], username=owner["username"]))
-    response = stub.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+    response = stub.AddBook(grpc_messages.AddBookRequest(book=book_obj, token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6IlRpbmthcmEifQ.YWdF84xJN21gUgOOLclpWYZHzJCkdgrdBFtdkrA2Rxg"))
     field = response.WhichOneof("AddBookResponseOneOf")
     if field == "error":
         print(response.error.error_msg)
