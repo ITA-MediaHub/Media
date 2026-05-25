@@ -3,12 +3,14 @@ from concurrent import futures
 import os
 import traceback
 import requests
+import jwt
 
 from book_service.grpc_interface.book_service_pb2_grpc import BookServiceServicer, add_BookServiceServicer_to_server
 import book_service.grpc_interface.book_service_msg_pb2 as grpc_messages
 import book_service.models.book as book_model
 
 USERS_SERVICE_LOCATION = "http://localhost:8000"
+TESTING = os.environ["TESTING"] or False
 
 class BookService(BookServiceServicer):
 
@@ -41,6 +43,10 @@ class BookService(BookServiceServicer):
         return book_obj
 
     def validateToken(self, token):
+        if TESTING:
+            claims = jwt.decode(token, "testingkey", ["HS256"])
+            return (claims["user_id"], claims["username"])
+
         response = requests.post(f"{USERS_SERVICE_LOCATION}/users/validate/", json={"token": token})
         response_json = response.json()
 
@@ -136,7 +142,7 @@ class BookService(BookServiceServicer):
     def RemoveBookCover(self, request, context):
         book_id = request.id
         try:
-            current_owner = book_model.getBookById(id)["owner"]
+            current_owner = book_model.getBookById(book_id)["owner"]
             user_id, username = self.validateToken(request.token)
             if user_id != current_owner["id"] or username != current_owner["username"]:
                 raise ValueError("Mismatch between owner and token (id, username or both)")
@@ -151,7 +157,7 @@ class BookService(BookServiceServicer):
     def RemoveBook(self, request, context):
         book_id = request.id
         try:
-            current_owner = book_model.getBookById(id)["owner"]
+            current_owner = book_model.getBookById(book_id)["owner"]
             user_id, username = self.validateToken(request.token)
             if user_id != current_owner["id"] or username != current_owner["username"]:
                 raise ValueError("Mismatch between owner and token (id, username or both)")

@@ -5,6 +5,10 @@ import os
 from pathlib import Path
 import threading
 import sqlite3
+import jwt
+
+os.environ["TESTING"] = "True" # set so grpc_server uses the dummy version of JWT validation (see validateToken function)
+
 from book_service.grpc_interface.book_service_pb2_grpc import BookServiceStub
 import book_service.grpc_interface.book_service_msg_pb2 as grpc_messages
 import book_service.grpc_server
@@ -50,6 +54,9 @@ class TestEndpoints(unittest.TestCase):
             DELETE FROM sqlite_sequence WHERE name IN ("book_has_author", "author", "book", "cover", "owner");
         """)
         cursor.close()
+
+    def generate_token(self, user_id, username):
+        return jwt.encode({"user_id": user_id, "username": username}, "testingkey", "HS256")
 
     def test_no_books(self):
         for response in self.client.GetBooks(grpc_messages.GetBooksRequest()):
@@ -114,7 +121,8 @@ class TestEndpoints(unittest.TestCase):
             pub_year=-1,
             owner=grpc_messages.Owner(id=1, username="owner1")
         )
-        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+        token = self.generate_token(1, "owner1")
+        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=token))
         self.assertEqual(response.WhichOneof("AddBookResponseOneOf"), "book_id")
         self.assertHasAttr(response, "book_id")
 
@@ -130,7 +138,8 @@ class TestEndpoints(unittest.TestCase):
             pub_year=-1,
             owner=grpc_messages.Owner(id=1, username="owner1")
         )
-        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+        token = self.generate_token(1, "owner1")
+        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=token))
         self.assertEqual(response.WhichOneof("AddBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -145,7 +154,8 @@ class TestEndpoints(unittest.TestCase):
             pub_year=-50,
             owner=grpc_messages.Owner(id=1, username="owner1")
         )
-        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+        token = self.generate_token(1, "owner1")
+        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=token))
         self.assertEqual(response.WhichOneof("AddBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -159,7 +169,8 @@ class TestEndpoints(unittest.TestCase):
             title="book1",
             pub_year=-1
         )
-        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+        token = self.generate_token(1, "owner1")
+        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=token))
         self.assertEqual(response.WhichOneof("AddBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -177,7 +188,8 @@ class TestEndpoints(unittest.TestCase):
             pub_year=-1,
             owner=grpc_messages.Owner(id=1, username="wrong_username")
         )
-        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+        token = self.generate_token(1, "owner1")
+        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=token))
         self.assertEqual(response.WhichOneof("AddBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -193,7 +205,8 @@ class TestEndpoints(unittest.TestCase):
             owner=grpc_messages.Owner(id=1, username="owner1"),
             cover=grpc_messages.Cover(type="text/plain", content=bytes())
         )
-        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+        token = self.generate_token(1, "owner1")
+        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=token))
         self.assertEqual(response.WhichOneof("AddBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -209,7 +222,8 @@ class TestEndpoints(unittest.TestCase):
             owner=grpc_messages.Owner(id=1, username="owner1"),
             authors=[grpc_messages.Author(last_name="")]
         )
-        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj))
+        token = self.generate_token(1, "owner1")
+        response = self.client.AddBook(grpc_messages.AddBookRequest(book=book_obj, token=token))
         self.assertEqual(response.WhichOneof("AddBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -223,7 +237,8 @@ class TestEndpoints(unittest.TestCase):
         cursor.execute("INSERT INTO owner (id, username) VALUES (?, ?)", (1, "owner1"))
         cursor.execute("INSERT INTO book (title, pub_year, owner_id) VALUES (?, ?, ?)", ("book1", 1970, 1))
 
-        response = self.client.UpdateBook(grpc_messages.UpdateBookRequest(id=1, title="new_title", pub_year=2000))
+        token = self.generate_token(1, "owner1")
+        response = self.client.UpdateBook(grpc_messages.UpdateBookRequest(id=1, title="new_title", pub_year=2000, token=token))
         self.assertEqual(response.WhichOneof("UpdateBookResponseOneOf"), "success")
         self.assertHasAttr(response.success, "success_msg")
         cursor.execute("SELECT title, pub_year FROM book WHERE id=?", (1,))
@@ -238,7 +253,8 @@ class TestEndpoints(unittest.TestCase):
         cursor.execute("INSERT INTO owner (id, username) VALUES (?, ?)", (1, "owner1"))
         cursor.execute("INSERT INTO book (title, pub_year, owner_id) VALUES (?, ?, ?)", ("book1", 1970, 1))
 
-        response = self.client.UpdateBook(grpc_messages.UpdateBookRequest(id=1, title=""))
+        token = self.generate_token(1, "owner1")
+        response = self.client.UpdateBook(grpc_messages.UpdateBookRequest(id=1, title="", token=token))
         self.assertEqual(response.WhichOneof("UpdateBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -249,7 +265,8 @@ class TestEndpoints(unittest.TestCase):
         cursor.close()
 
     def test_update_book_non_existant(self):
-        response = self.client.UpdateBook(grpc_messages.UpdateBookRequest(id=1, title="new_title", pub_year=2000))
+        token = self.generate_token(1, "owner1")
+        response = self.client.UpdateBook(grpc_messages.UpdateBookRequest(id=1, title="new_title", pub_year=2000, token=token))
         self.assertEqual(response.WhichOneof("UpdateBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -259,7 +276,8 @@ class TestEndpoints(unittest.TestCase):
         cursor.execute("INSERT INTO cover (id, type, content) VALUES (?, ?, ?)", (1, "image/png", bytes()))
         cursor.execute("INSERT INTO book (title, pub_year, owner_id, cover_id) VALUES (?, ?, ?, ?)", ("book1", 1970, 1, 1))
 
-        response = self.client.RemoveBookCover(grpc_messages.RemoveBookCoverRequest(id=1))
+        token = self.generate_token(1, "owner1")
+        response = self.client.RemoveBookCover(grpc_messages.RemoveBookCoverRequest(id=1, token=token))
         self.assertEqual(response.WhichOneof("RemoveBookCoverResponseOneOf"), "success")
         self.assertHasAttr(response.success, "success_msg")
 
@@ -269,7 +287,8 @@ class TestEndpoints(unittest.TestCase):
         cursor.close()
 
     def test_remove_book_cover_non_existant(self):
-        response = self.client.RemoveBookCover(grpc_messages.RemoveBookCoverRequest(id=1))
+        token = self.generate_token(1, "owner1")
+        response = self.client.RemoveBookCover(grpc_messages.RemoveBookCoverRequest(id=1, token=token))
         self.assertEqual(response.WhichOneof("RemoveBookCoverResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -278,7 +297,8 @@ class TestEndpoints(unittest.TestCase):
         cursor.execute("INSERT INTO owner (id, username) VALUES (?, ?)", (1, "owner1"))
         cursor.execute("INSERT INTO book (title, pub_year, owner_id) VALUES (?, ?, ?)", ("book1", 1970, 1))
 
-        response = self.client.RemoveBookCover(grpc_messages.RemoveBookCoverRequest(id=1))
+        token = self.generate_token(1, "owner1")
+        response = self.client.RemoveBookCover(grpc_messages.RemoveBookCoverRequest(id=1, token=token))
         self.assertEqual(response.WhichOneof("RemoveBookCoverResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
 
@@ -289,7 +309,8 @@ class TestEndpoints(unittest.TestCase):
         cursor.execute("INSERT INTO owner (id, username) VALUES (?, ?)", (1, "owner1"))
         cursor.execute("INSERT INTO book (id, title, pub_year, owner_id) VALUES (?, ?, ?, ?)", (1, "book1", 1970, 1))
 
-        response = self.client.RemoveBook(grpc_messages.RemoveBookRequest(id=1))
+        token = self.generate_token(1, "owner1")
+        response = self.client.RemoveBook(grpc_messages.RemoveBookRequest(id=1, token=token))
         self.assertEqual(response.WhichOneof("RemoveBookResponseOneOf"), "success")
         self.assertHasAttr(response.success, "success_msg")
 
@@ -299,6 +320,7 @@ class TestEndpoints(unittest.TestCase):
         cursor.close()
 
     def test_remove_book_non_existant(self):
-        response = self.client.RemoveBook(grpc_messages.RemoveBookRequest(id=1))
+        token = self.generate_token(1, "owner1")
+        response = self.client.RemoveBook(grpc_messages.RemoveBookRequest(id=1, token=token))
         self.assertEqual(response.WhichOneof("RemoveBookResponseOneOf"), "error")
         self.assertHasAttr(response.error, "error_msg")
