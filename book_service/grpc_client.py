@@ -33,8 +33,29 @@ def addBookTest():
         print(response.book_id)
     else: raise ValueError("Invalid response recieved")
 
+def updateBookTest():
+    request = grpc_messages.UpdateBookRequest(id=1, title="NewBook", token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6IlRpYm9yIn0.i5PNHL67MS4ICjD7LicqJR_jyG4HRDTnew9siADhxjA")
+    response = stub.UpdateBook(request)
+    field = response.WhichOneof("UpdateBookResponseOneOf")
+    if field == "error":
+        print(response.error.error_msg)
+    elif field == "success":
+        print(response.success.success_msg)
+
+def removeBookCoverTest():
+    request = grpc_messages.RemoveBookCoverRequest(id=1, token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6IlRpYm9yIn0.i5PNHL67MS4ICjD7LicqJR_jyG4HRDTnew9siADhxjA")
+    response = stub.RemoveBookCover(request)
+    field = response.WhichOneof("RemoveBookCoverResponseOneOf")
+    if field == "error":
+        print(response.error.error_msg)
+    elif field == "success":
+        print(response.success.success_msg)
+
+
 def main():
-    addBookTest()
+    #addBookTest()
+    #updateBookTest()
+    removeBookCoverTest()
 
 if __name__=="__main__":
     main()

@@ -121,6 +121,11 @@ class BookService(BookServiceServicer):
             })
 
         try:
+            current_owner = book_model.getBookById(id)["owner"]
+            user_id, username = self.validateToken(request.token)
+            if user_id != current_owner["id"] or username != current_owner["username"]:
+                raise ValueError("Mismatch between owner and token (id, username or both)")
+            
             book_model.updateBook(id, title, owner, pub_year, cover, authors)
             success = grpc_messages.Success(success_msg="Book successfully updated.")
             return grpc_messages.UpdateBookResponse(success=success)
@@ -131,6 +136,11 @@ class BookService(BookServiceServicer):
     def RemoveBookCover(self, request, context):
         book_id = request.id
         try:
+            current_owner = book_model.getBookById(id)["owner"]
+            user_id, username = self.validateToken(request.token)
+            if user_id != current_owner["id"] or username != current_owner["username"]:
+                raise ValueError("Mismatch between owner and token (id, username or both)")
+            
             book_model.removeBookCover(book_id)
             success = grpc_messages.Success(success_msg="Cover successfully removed.")
             return grpc_messages.RemoveBookCoverResponse(success=success)
@@ -141,6 +151,11 @@ class BookService(BookServiceServicer):
     def RemoveBook(self, request, context):
         book_id = request.id
         try:
+            current_owner = book_model.getBookById(id)["owner"]
+            user_id, username = self.validateToken(request.token)
+            if user_id != current_owner["id"] or username != current_owner["username"]:
+                raise ValueError("Mismatch between owner and token (id, username or both)")
+            
             book_model.removeBook(book_id)
             success = grpc_messages.Success(success_msg="Book successfully removed.")
             return grpc_messages.RemoveBookResponse(success=success)
